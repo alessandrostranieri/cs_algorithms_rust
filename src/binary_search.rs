@@ -1,4 +1,4 @@
-mod search {
+pub mod search {
     pub fn binary_search<T: PartialOrd>(nums: &Vec<T>, target: T) -> Option<usize> {
         if nums.is_empty() {
             return None;
