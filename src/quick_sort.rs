@@ -2,18 +2,9 @@ pub mod sorting {
     /// Quick sort.
     /// Adapted from the C++ implementation at: https://www.geeksforgeeks.org/quick-sort/
     pub fn quick_sort<T: PartialOrd + Clone>(v: &mut [T]) -> () {
-        if v.is_empty() {
-            return;
-        }
-
-        let high = v.len() - 1;
-        let low = 0usize;
-
-        if low < high {
-            let partition_index = partition(v, low, high);
-
-            quick_sort_recursive(v, low, partition_index - 1);
-            quick_sort_recursive(v, partition_index + 1, high);
+        match v.is_empty() {
+            true => (),
+            false => quick_sort_impl(v, 0usize, v.len() - 1)
         }
     }
 
@@ -33,16 +24,12 @@ pub mod sorting {
         return low_index;
     }
 
-    fn quick_sort_recursive<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> () {
-        if v.is_empty() {
-            return;
-        }
-
+    fn quick_sort_impl<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> () {
         if low < high {
             let partition_index = partition(v, low, high);
 
-            quick_sort_recursive(v, low, partition_index - 1);
-            quick_sort_recursive(v, partition_index + 1, high);
+            quick_sort_impl(v, low, partition_index - 1);
+            quick_sort_impl(v, partition_index + 1, high);
         }
     }
 }
@@ -70,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_vector_2(){
+    fn sort_vector_2() {
         let mut v: Vec<u32> = vec![10, 7, 8, 9, 1, 5];
 
         quick_sort(&mut v);
