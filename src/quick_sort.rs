@@ -32,11 +32,74 @@ pub mod sorting {
             quick_sort_impl(v, partition_index + 1, high);
         }
     }
+
+    pub fn quick_sort_dual_pivot<T: PartialOrd + Clone>(v: &mut [T]) -> () {
+        match v.is_empty() {
+            true => (),
+            false => quick_sort_dual_pivot_impl(v, 0usize, v.len() - 1)
+        }
+    }
+
+    /// Dual Pivot Quick-Sort
+    /// Adapted from the C code at: https://www.geeksforgeeks.org/dual-pivot-quicksort/
+    fn quick_sort_dual_pivot_impl<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> () {
+        if low < high {
+            let (left_partition, right_partition) = dual_pivot_partition(v, low, high);
+            quick_sort_dual_pivot_impl(v, low, left_partition - 1);
+            quick_sort_dual_pivot_impl(v, left_partition + 1, right_partition - 1);
+            quick_sort_dual_pivot_impl(v, right_partition + 1, high);
+        }
+    }
+
+    fn dual_pivot_partition<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> (usize, usize) {
+        if v[low] > v[high] {
+            v.swap(low, high);
+        }
+        // PIVOTS
+        let left_pivot = v[low].clone();
+        let right_pivot = v[high].clone();
+        // RUNNING CURSORS
+        let mut right_cursor = high - 1;
+        let mut cursor = low + 1;
+        let mut left_cursor = low + 1;
+        // LOOP
+        while cursor <= right_cursor {
+            // MOVE ELEMENTS TO THE LEFT PARTITION
+            if v[cursor] < left_pivot {
+                v.swap(left_cursor, cursor);
+                left_cursor += 1;
+            } else if v[cursor] >= right_pivot {
+                // POSITION RIGHT CURSOR TO THE FIRST ELEMENT FROM THE RIGHT LESS OR EQUAL THAN RIGHT PIVOT
+                while v[right_cursor] > right_pivot && cursor < right_cursor {
+                    right_cursor -= 1;
+                }
+                // PUT ELEMENT IN THE RIGHT PARTITON
+                v.swap(cursor, right_cursor);
+                // NEW RIGHT CURSOR
+                right_cursor -= 1;
+                // UNDER CURSOR THERE IS NOW SOMETHING LESS THAN OR EQUAL RIGHT PIVOT
+                // IF IT IS ALSO LESS THAN LEFT PIVOT, SWAP
+                if v[cursor] < left_pivot {
+                    v.swap(cursor, left_cursor);
+                    left_cursor += 1;
+                }
+            }
+            cursor += 1;
+        }
+        // MOVE PARTITION CURSORS TO ACTUAL PIVOT POSITIONS
+        left_cursor -= 1;
+        right_cursor += 1;
+        // BRING PIVOTS TO THEIR APPROPRIATE POSITIONS
+        v.swap(low, left_cursor);
+        v.swap(high, right_cursor);
+
+        return (cursor, right_cursor);
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::quick_sort::sorting::quick_sort;
+    use crate::quick_sort::sorting::{quick_sort, quick_sort_dual_pivot};
 
     #[test]
     fn sort_empty_vector_does_not_change_the_vector() {
@@ -61,6 +124,24 @@ mod tests {
         let mut v: Vec<u32> = vec![10, 7, 8, 9, 1, 5];
 
         quick_sort(&mut v);
+
+        assert_eq!(v, vec![1, 5, 7, 8, 9, 10]);
+    }
+
+    #[test]
+    fn quick_sort_dual_pivot_empty() {
+        let mut v: Vec<u32> = vec![];
+
+        quick_sort_dual_pivot(&mut v);
+
+        assert_eq!(v, vec![]);
+    }
+
+    #[test]
+    fn quick_sort_dual_pivot_1() {
+        let mut v: Vec<u32> = vec![10, 7, 8, 9, 1, 5];
+
+        quick_sort_dual_pivot(&mut v);
 
         assert_eq!(v, vec![1, 5, 7, 8, 9, 10]);
     }
