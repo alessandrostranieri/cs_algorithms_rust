@@ -4,7 +4,7 @@ pub mod sorting {
     pub fn quick_sort<T: PartialOrd + Clone>(v: &mut [T]) -> () {
         match v.is_empty() {
             true => (),
-            false => quick_sort_impl(v, 0usize, v.len() - 1)
+            false => quick_sort_impl(v, 0usize, v.len() - 1),
         }
     }
 
@@ -27,22 +27,28 @@ pub mod sorting {
     fn quick_sort_impl<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> () {
         if low < high {
             let partition_index = partition(v, low, high);
+            let partition_left = partition_index.checked_sub(1);
+            let partition_right = partition_index.checked_add(1); 
 
-            quick_sort_impl(v, low, partition_index - 1);
-            quick_sort_impl(v, partition_index + 1, high);
+            quick_sort_impl(v, low, partition_left.unwrap_or(low));
+            quick_sort_impl(v, partition_right.unwrap_or(high), high);
         }
     }
 
     pub fn quick_sort_dual_pivot<T: PartialOrd + Clone>(v: &mut [T]) -> () {
         match v.is_empty() {
             true => (),
-            false => quick_sort_dual_pivot_impl(v, 0usize, v.len() - 1)
+            false => quick_sort_dual_pivot_impl(v, 0usize, v.len() - 1),
         }
     }
 
     /// Dual Pivot Quick-Sort
     /// Adapted from the C code at: https://www.geeksforgeeks.org/dual-pivot-quicksort/
-    fn quick_sort_dual_pivot_impl<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> () {
+    fn quick_sort_dual_pivot_impl<T: PartialOrd + Clone>(
+        v: &mut [T],
+        low: usize,
+        high: usize,
+    ) -> () {
         if low < high {
             let (left_partition, right_partition) = dual_pivot_partition(v, low, high);
             quick_sort_dual_pivot_impl(v, low, left_partition - 1);
@@ -51,7 +57,11 @@ pub mod sorting {
         }
     }
 
-    fn dual_pivot_partition<T: PartialOrd + Clone>(v: &mut [T], low: usize, high: usize) -> (usize, usize) {
+    fn dual_pivot_partition<T: PartialOrd + Clone>(
+        v: &mut [T],
+        low: usize,
+        high: usize,
+    ) -> (usize, usize) {
         if v[low] > v[high] {
             v.swap(low, high);
         }
@@ -102,7 +112,7 @@ mod tests {
     use crate::quick_sort::sorting::{quick_sort, quick_sort_dual_pivot};
 
     #[test]
-    fn sort_empty_vector_does_not_change_the_vector() {
+    fn quick_sort_empty() {
         let mut v_empty: Vec<i32> = Vec::new();
 
         quick_sort(&mut v_empty);
@@ -111,7 +121,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_vector_1() {
+    fn quick_sort_1() {
         let mut v: Vec<i32> = vec![1, 9, 2, 5, 4];
 
         quick_sort(&mut v);
@@ -120,12 +130,21 @@ mod tests {
     }
 
     #[test]
-    fn sort_vector_2() {
+    fn quick_sort_2() {
         let mut v: Vec<u32> = vec![10, 7, 8, 9, 1, 5];
 
         quick_sort(&mut v);
 
         assert_eq!(v, vec![1, 5, 7, 8, 9, 10]);
+    }
+
+    #[test]
+    fn quick_sort_3() {
+        let mut v: Vec<u32> = vec![15, 85, 32, 4, 21, 24];
+
+        quick_sort(&mut v);
+
+        assert_eq!(v, vec![4, 15, 21, 24, 32, 85]);
     }
 
     #[test]
