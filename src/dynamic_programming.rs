@@ -12,10 +12,10 @@ fn edit_distance_recursive_impl(s1: &[char], s2: &[char]) -> usize {
     }
 
     if s1[m - 1] == s2[n - 1] {
-        edit_distance_recursive_impl(&s1[..m - 1], &s2[..n - 1]);
+        return edit_distance_recursive_impl(&s1[..m - 1], &s2[..n - 1]);
     }
 
-    1usize + min(
+    return 1usize + min(
         min(
             edit_distance_recursive_impl(&s1[0..m], &s2[0..(n - 1)]),
             edit_distance_recursive_impl(&s1[0..(m - 1)], &s2[0..n]),
@@ -56,8 +56,6 @@ fn edit_distance_dp_impl(s1: &[char], s2: &[char]) -> usize {
             }
         }
     }
-
-    println!("{:?}", d);
 
     d[m][n]
 }
